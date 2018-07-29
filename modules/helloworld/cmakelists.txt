@@ -1,0 +1,4 @@
+project (helloworld)
+include_directories(in)
+file(GLOB SOURCES "src/*.cpp")
+add_executable(helloworld ${SOURCES})
