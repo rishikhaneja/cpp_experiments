@@ -1,14 +1,12 @@
 cmake_minimum_required(VERSION 3.12)
 
-set(EXECUTABLE_NAME per_day)
+set(EXECUTABLE_NAME range)
 
 project(${EXECUTABLE_NAME})
 
 include_directories(inc)
 
 include_directories("${gtest_SOURCE_DIR}/include")
-
-include_directories("${range_SOURCE_DIR}/inc")
 
 file(GLOB SOURCES "src/*.cpp")
 

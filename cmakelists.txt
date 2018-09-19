@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
+project(cpp_experiments)
+
 # ---------------------------------------------------------------------
 # Download and unpack googletest
 configure_file(dependencies/gtest googletest-download/CMakeLists.txt)
@@ -22,5 +24,6 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
 
 add_subdirectory(modules/_template_)
 add_subdirectory(modules/patterns/pimpl)
+add_subdirectory(modules/patterns/range)
 add_subdirectory(modules/boost/spirit)
 add_subdirectory(modules/practice/per_day)
