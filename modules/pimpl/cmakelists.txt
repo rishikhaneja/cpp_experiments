@@ -6,6 +6,8 @@ project(${EXECUTABLE_NAME})
 
 include_directories(inc)
 
+include_directories("${gtest_SOURCE_DIR}/include")
+
 file(GLOB SOURCES "src/*.cpp")
 
 add_executable(${EXECUTABLE_NAME} ${SOURCES})
@@ -13,3 +15,5 @@ add_executable(${EXECUTABLE_NAME} ${SOURCES})
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES
     CXX_STANDARD 17
 )
+
+target_link_libraries(${EXECUTABLE_NAME} gmock_main)

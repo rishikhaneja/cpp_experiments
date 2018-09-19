@@ -1,25 +1,13 @@
-/*=============================================================================
-    Copyright (c) 2002-2010 Joel de Guzman
-
-    Distributed under the Boost Software License, Version 1.0. (See accompanying
-    file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-=============================================================================*/
-///////////////////////////////////////////////////////////////////////////////
-//
-//  This sample demontrates a parser for a comma separated list of numbers.
-//  No actions.
-//
-//  [ JDG May 10, 2002 ]    spirit1
-//  [ JDG March 24, 2007 ]  spirit2
-//
-///////////////////////////////////////////////////////////////////////////////
-
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 #include <iostream>
 #include <string>
 #include <vector>
+
+
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace client {
 namespace qi = boost::spirit::qi;
@@ -46,10 +34,10 @@ template <typename Iterator> bool parse_numbers(Iterator first, Iterator last) {
 //]
 } // namespace client
 
-////////////////////////////////////////////////////////////////////////////
-//  Main program
-////////////////////////////////////////////////////////////////////////////
-int main() {
+using namespace std;
+using namespace testing;
+
+TEST(boost_spirit, basic) {
   std::cout << "/////////////////////////////////////////////////////////\n\n";
   std::cout << "\t\tA comma separated list parser for Spirit...\n\n";
   std::cout << "/////////////////////////////////////////////////////////\n\n";
@@ -74,5 +62,4 @@ int main() {
   }
 
   std::cout << "Bye... :-) \n\n";
-  return 0;
 }

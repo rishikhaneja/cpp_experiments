@@ -6,6 +6,8 @@ project(${EXECUTABLE_NAME})
 
 include_directories(inc)
 
+include_directories("${gtest_SOURCE_DIR}/include")
+
 find_package(Boost 1.36.0)
 include_directories(${Boost_INCLUDE_DIRS})
 
@@ -16,3 +18,5 @@ add_executable(${EXECUTABLE_NAME} ${SOURCES})
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES
     CXX_STANDARD 17
 )
+
+target_link_libraries(${EXECUTABLE_NAME} gmock_main)
