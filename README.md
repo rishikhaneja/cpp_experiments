@@ -1,5 +1,15 @@
 # Experiments in C++
 
+## Contents
+ * [per day practice](https://github.com/rishikhaneja/cpp_experiments/blob/master/modules/practice/per_day/src/test.cpp)
+ * [design patterns prototypes](https://github.com/rishikhaneja/cpp_experiments/tree/master/modules/patterns)
+ * and more....
+
 ## Highlights
 
-* [range](https://github.com/rishikhaneja/cpp_experiments/blob/master/modules/patterns/range/inc/range.hpp)
+* [pattern: range](https://github.com/rishikhaneja/cpp_experiments/blob/master/modules/patterns/range/inc/range.hpp)
+
+## Prerequisites
+
+* latest gcc
+* internet connection for google test download
