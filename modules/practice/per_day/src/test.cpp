@@ -1,3 +1,7 @@
+// ---------------------------------------------------------------------------------
+// solving a coding problem a day, courtesy of https://www.dailycodingproblem.com/
+// ---------------------------------------------------------------------------------
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
