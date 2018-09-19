@@ -20,6 +20,6 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                  EXCLUDE_FROM_ALL)
 # ---------------------------------------------------------------------
 
-add_subdirectory(modules/helloworld)
-add_subdirectory(modules/pimpl)
+add_subdirectory(modules/_template_)
+add_subdirectory(modules/patterns/pimpl)
 add_subdirectory(modules/boost/spirit)
