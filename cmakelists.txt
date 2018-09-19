@@ -23,3 +23,4 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
 add_subdirectory(modules/_template_)
 add_subdirectory(modules/patterns/pimpl)
 add_subdirectory(modules/boost/spirit)
+add_subdirectory(modules/practice/per_day)
