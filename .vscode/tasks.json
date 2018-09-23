@@ -1,0 +1,50 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "_template_",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build/modules/helloworld && ./helloworld",
+            "problemMatcher": []
+        },
+        {
+            "label": "boost/spirit",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build/modules/boost/spirit && ./spirit",
+            "problemMatcher": []
+        },
+        {
+            "label": "patterns/pimpl",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build/modules/patterns/pimpl && ./pimpl",
+            "problemMatcher": []
+        },
+        {
+            "label": "patterns/range",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build/modules/patterns/range && ./range",
+            "problemMatcher": []
+        },
+        {
+            "label": "practice/per_day",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build/modules/practice/per_day && ./per_day",
+            "problemMatcher": []
+        },
+        {
+            "label": "libclang/try",
+            "type": "shell",
+            "command": "python3 ${workspaceFolder}/scripts/libclang/try/try.py ${workspaceFolder}/modules/libclang/try/try.cpp",
+            "problemMatcher": [],
+            "osx": {
+                "options": {
+                    "env": {
+                        "PYTHONPATH": "$PYTHONPATH:/usr/local/Cellar/llvm/7.0.0/lib/python2.7/site-packages"
+                    }
+                }
+            }
+        }
+    ]
+}

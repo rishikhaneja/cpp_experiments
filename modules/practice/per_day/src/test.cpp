@@ -1,5 +1,6 @@
 // ---------------------------------------------------------------------------------
-// solving a coding problem a day, courtesy of https://www.dailycodingproblem.com/
+// solving a coding problem a day, courtesy of
+// https://www.dailycodingproblem.com/
 // ---------------------------------------------------------------------------------
 
 #include <algorithm>
@@ -217,7 +218,7 @@ TEST(per_day, 3) {
     std::cout << serialize(m) << std::endl;
 }
 
-// iven an array of integers, find the first missing positive integer in linear
+// Given an array of integers, find the first missing positive integer in linear
 // time and constant space. In other words, find the lowest positive integer
 // that does not exist in the array. The array can contain duplicates and
 // negative numbers as well.
