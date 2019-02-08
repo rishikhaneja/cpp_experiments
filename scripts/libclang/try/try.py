@@ -7,15 +7,13 @@ def get_info(node, depth=0):
     else:
         children = [get_info(c, depth+1)
                     for c in node.get_children()]
-    return {'id': get_cursor_id(node),
-            'kind': node.kind,
+    return {'kind': node.kind,
             'usr': node.get_usr(),
             'spelling': node.spelling,
             'location': node.location,
             'extent.start': node.extent.start,
             'extent.end': node.extent.end,
             'is_definition': node.is_definition(),
-            'definition id': get_cursor_id(node.get_definition()),
             'children': children}
 
 

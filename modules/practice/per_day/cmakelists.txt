@@ -6,9 +6,9 @@ project(${EXECUTABLE_NAME})
 
 include_directories(inc)
 
-include_directories("${gtest_SOURCE_DIR}/include")
+include_directories(${gtest_SOURCE_DIR}/include)
 
-include_directories("${range_SOURCE_DIR}/inc")
+include_directories(${range_SOURCE_DIR}/inc)
 
 file(GLOB SOURCES "src/*.cpp")
 

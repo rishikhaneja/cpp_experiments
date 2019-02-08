@@ -6,10 +6,9 @@ project(${EXECUTABLE_NAME})
 
 include_directories(inc)
 
-include_directories(${gtest_SOURCE_DIR}/include)
+include_directories(${SOLUTION_DIR}/modules/patterns/range/inc)
 
-find_package(Boost 1.36.0)
-include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${gtest_SOURCE_DIR}/include)
 
 file(GLOB SOURCES "src/*.cpp")
 

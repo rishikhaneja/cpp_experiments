@@ -45,6 +45,12 @@
                     }
                 }
             }
-        }
+        },
+        {
+            "label": "playground",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build/modules/playground && ./playground",
+            "problemMatcher": []
+        },
     ]
 }

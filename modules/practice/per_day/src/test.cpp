@@ -164,7 +164,7 @@ auto serialize = [](const auto& n) -> std::string {
 // Node('right')) assert deserialize(serialize(node)).left.left.val ==
 // 'left.left'
 TEST(per_day, 3) {
-    auto deserialize = [](auto& n, const std::string_view str) -> size_t {
+    auto deserialize = [](auto& n, const std::string_view str) {
         using node_t = std::remove_reference_t<decltype(n)>;
         bool value = true, left = true;
         stack<node_t*> stk;
