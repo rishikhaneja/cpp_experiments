@@ -1,4 +1,4 @@
-#include "interface.hpp"
+#include "interface.h"
 
 #include <iostream>
 #include <memory>

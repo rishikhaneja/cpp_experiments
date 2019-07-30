@@ -1,4 +1,4 @@
-#include "interface.hpp"
+#include "interface.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

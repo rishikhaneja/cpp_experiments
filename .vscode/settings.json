@@ -39,6 +39,24 @@
         "tuple": "cpp",
         "vector": "cpp",
         "utility": "cpp",
-        "ios": "cpp"
+        "ios": "cpp",
+        "ostream": "cpp",
+        "__split_buffer": "cpp",
+        "queue": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "__tree": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "forward_list": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "__locale": "cpp",
+        "iosfwd": "cpp",
+        "istream": "cpp",
+        "streambuf": "cpp"
     }
 }

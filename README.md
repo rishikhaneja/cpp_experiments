@@ -7,7 +7,7 @@
 
 ## Highlights
 
-* [pattern: range](https://github.com/rishikhaneja/cpp_experiments/blob/master/modules/patterns/range/inc/range.hpp)
+* [pattern: range](https://github.com/rishikhaneja/cpp_experiments/blob/master/modules/patterns/range/inc/range.h)
 
 ## Prerequisites
 

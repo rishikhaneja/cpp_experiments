@@ -8,6 +8,8 @@ include_directories(inc)
 
 include_directories(${gtest_SOURCE_DIR}/include)
 
+include_directories(${PATTERNS_DIR}/range/inc)
+
 file(GLOB SOURCES "src/*.cpp")
 
 add_executable(${EXECUTABLE_NAME} ${SOURCES})

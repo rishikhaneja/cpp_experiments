@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(lldb) Launch helloworld",
+            "name": "(lldb) Launch _template_",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/modules/helloworld/helloworld",
+            "program": "${workspaceFolder}/build/modules/_template_/_template_",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
@@ -17,10 +17,10 @@
             "MIMode": "lldb"
         },
         {
-            "name": "(lldb) Launch pimpl",
+            "name": "(lldb) Launch patterns/pimpl",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/modules/pimpl/pimpl",
+            "program": "${workspaceFolder}/build/modules/patterns/pimpl/pimpl",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
@@ -29,7 +29,19 @@
             "MIMode": "lldb"
         },
         {
-            "name": "(lldb) Launch sprit",
+            "name": "(lldb) Launch patterns/tree",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/modules/patterns/tree/tree",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "lldb"
+        },
+        {
+            "name": "(lldb) Launch boost/sprit",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/modules/boost/spirit/spirit",
@@ -39,6 +51,6 @@
             "environment": [],
             "externalConsole": true,
             "MIMode": "lldb"
-        }
+        },
     ]
 }

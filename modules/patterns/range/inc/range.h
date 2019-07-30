@@ -11,7 +11,7 @@
 namespace detail {
 
 template <typename T>
-struct range {
+struct Range {
     // -----------------------------------------------------------------------
     T m_begin;
     T m_end;
@@ -21,17 +21,32 @@ struct range {
     T& end() { return m_end; }
     const T& end() const { return m_end; }
     // -----------------------------------------------------------------------
-};  // range
+};  // Range
 
 }  // namespace detail
 
 /**
- * @brief makes a range
+ * @brief makes a Range
  * @param a pair of iterators
  */
-auto make_range = [](auto a, auto b) {
-    static_assert(std::is_same<decltype(a), decltype(b)>::value);
-    return detail::range<decltype(a)>{a, b};
+auto make_range = [](const auto&... args) {
+    // -----------------------------------------------------------------------
+    static_assert(sizeof...(args) == 1 || sizeof...(args) == 2);
+    // -----------------------------------------------------------------------
+    auto make_range_from_range = [&](const auto& a) {
+        return detail::Range<decltype(begin(a))>{begin(a), end(a)};
+    };
+    // -----------------------------------------------------------------------
+    auto make_range_from_pairs = [&](auto a, auto b) {
+        static_assert(std::is_same<decltype(a), decltype(b)>::value);
+        return detail::Range<decltype(a)>{a, b};
+    };
+    // -----------------------------------------------------------------------
+    if constexpr (sizeof...(args) == 1) {
+        return make_range_from_range(args...);
+    } else if constexpr (sizeof...(args) == 2) {
+        return make_range_from_pairs(args...);
+    }
 };
 
 // ---------------------------------------------------------------------
@@ -81,8 +96,8 @@ struct indexed_iterator {
 }  // namespace detail
 
 /**
- * @brief makes an indexed range
- * @param a range or a pair of iterators
+ * @brief makes an indexed Range
+ * @param a Range or a pair of iterators
  */
 auto make_indexed_range = [](const auto&... args) {
     // -----------------------------------------------------------------------
