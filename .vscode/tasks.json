@@ -34,6 +34,12 @@
             "problemMatcher": []
         },
         {
+            "label": "patterns/scheduler",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build/modules/patterns/scheduler && ./scheduler",
+            "problemMatcher": []
+        },
+        {
             "label": "practice/per_day",
             "type": "shell",
             "command": "cd ${workspaceFolder}/build/modules/practice/per_day && ./per_day",
