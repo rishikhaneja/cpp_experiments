@@ -1,0 +1,194 @@
+#include <algorithm>
+#include <cassert>
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <variant>
+#include <vector>
+
+using namespace std;
+
+// https://medium.com/@dennis.luxen/breaking-circular-dependencies-in-recursive-union-types-with-c-17-the-curious-case-of-4ab00cfda10d
+template <typename T>
+struct recursive_wrapper {
+  // construct from an existing object
+  recursive_wrapper(T t_) { t.emplace_back(std::move(t_)); }
+  // cast back to wrapped type
+  operator const T &() const { return t.front(); }
+  operator T &() { return t.front(); }
+  // store the value
+  std::vector<T> t;
+};
+
+class Scheduler {
+ public:
+  using Body = function<void(void)>;
+
+  struct CompositeTask;
+  using CompositeTaskWrapper = recursive_wrapper<CompositeTask>;
+
+  using Task = variant<Body, CompositeTaskWrapper>;
+
+  struct CompositeTask {
+    struct TaskData {
+      string name;
+      Task task;
+    };
+
+    vector<TaskData> tasks;
+    unordered_map<string, size_t> registry;
+
+    void pushBack(string name, Task task) {
+      assert(registry.find(name) == registry.end());
+      tasks.push_back({name, task});
+      registry[move(name)] = tasks.size() - 1;
+    }
+
+    void insertBefore(string name, Task task, string otherTask) {
+      auto otherIndex = findTaskIndex(otherTask);
+      assert(otherIndex);
+      tasks.insert(tasks.begin() + *otherIndex, {move(name), task});
+      updateIndicesAfter(*otherIndex);
+    }
+
+    void insertAfter(string name, Task task, string otherTask) {
+      auto otherIndex = findTaskIndex(otherTask);
+      assert(otherIndex);
+      tasks.insert(tasks.begin() + (*otherIndex + 1), {move(name), task});
+      updateIndicesAfter(*otherIndex + 1);
+    }
+
+    void updateIndicesAfter(size_t index) {
+      for (; index != tasks.size(); ++index) {
+        auto& t = tasks[index];
+        registry[t.name] = index;
+      }
+    }
+
+    optional<size_t> findTaskIndex(string_view name) {
+      auto it = registry.find(string(name));
+      if (it != registry.end()) {
+        return it->second;
+      } else {
+        return {};
+      }
+    }
+
+    Task* findTask(string_view name) {
+      auto index = findTaskIndex(name);
+      if (index) {
+        return &(tasks[*index].task);
+      } else {
+        return nullptr;
+      }
+    }
+
+    CompositeTask* findCompositeTask(string_view name) {
+      auto task = findTask(name);
+      if (task) {
+        auto compositeTaskWrapper = get_if<CompositeTaskWrapper>(task);
+        if (compositeTaskWrapper) {
+          return &static_cast<CompositeTask&>(*compositeTaskWrapper);
+        } else {
+          return nullptr;
+        }
+      } else {
+        return nullptr;
+      }
+    }
+
+    struct TaskExecutor {
+      void operator()(Body t) { t(); }
+      void operator()(CompositeTask t) { t.executeAll(); }
+    };
+
+    void executeAll() {
+      for (auto& t : tasks) {
+        visit(TaskExecutor{}, t.task);
+      }
+    }
+
+    struct TaskDryExecutor {
+      string indent;
+      void operator()(Body t) {}
+      void operator()(CompositeTask t) { t.dryExecuteAll(indent); }
+    };
+
+    void dryExecuteAll(string indent) {
+      for (auto& t : tasks) {
+        cout << indent << t.name << "\n";
+        visit(TaskDryExecutor{indent + indent}, t.task);
+      }
+    }
+  };
+
+  void pushBack(string name, Task task) { mainTask.pushBack(name, task); }
+
+  void insertBefore(string name, Task task, string otherTask) {
+    mainTask.insertBefore(name, task, otherTask);
+  }
+
+  void insertAfter(string name, Task task, string otherTask) {
+    mainTask.insertAfter(name, task, otherTask);
+  }
+
+  Task* findTask(string_view name) { return mainTask.findTask(name); }
+
+  CompositeTask* findCompositeTask(string_view name) {
+    return mainTask.findCompositeTask(name);
+  }
+
+  void executeAll() { mainTask.executeAll(); }
+
+  void dryExecuteAll(string indent) { mainTask.dryExecuteAll(indent); }
+
+ private:
+  CompositeTask mainTask;
+};
+
+struct Main {
+  void update() {}
+  void render1() {}
+  void render2() {}
+};
+
+struct MainExtension {
+  void preUpdate() {}
+  void postUpdate() {}
+  void preRender2() {}
+  void postRender2() {}
+};
+
+int main() {
+  Scheduler s;
+  {
+    Main m;
+
+    s.pushBack("update", [&m] { m.update(); });
+
+    Scheduler::CompositeTask render;
+    render.pushBack("render1", [&m] { m.render1(); });
+    render.pushBack("render2", [&m] { m.render2(); });
+    s.pushBack("render", move(render));
+  }
+  {
+    MainExtension me;
+
+    s.insertBefore(
+        "preUpdate", [&me] { me.preUpdate(); }, "update");
+    s.insertAfter(
+        "postUpdate", [&me] { me.postUpdate(); }, "update");
+
+    auto render = s.findCompositeTask("render");
+    render->insertBefore(
+        "preRender2", [&me] { me.preRender2(); }, "render2");
+    render->insertAfter(
+        "postRender2", [&me] { me.postRender2(); }, "render2");
+
+    s.dryExecuteAll("  ");
+  }
+}
