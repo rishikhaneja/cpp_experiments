@@ -7,81 +7,77 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <variant>
 #include <vector>
 
+#define PRINT_FUNCTION std::cout << __PRETTY_FUNCTION__ << "\n"
+
 using namespace std;
 
-// https://medium.com/@dennis.luxen/breaking-circular-dependencies-in-recursive-union-types-with-c-17-the-curious-case-of-4ab00cfda10d
+template <class... Ts>
+struct overloaded : Ts... {
+  using Ts::operator()...;
+};
+template <class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
+
 template <typename T>
 struct recursive_wrapper {
-  // construct from an existing object
-  recursive_wrapper(T t_) { t.emplace_back(std::move(t_)); }
-  // cast back to wrapped type
-  operator const T &() const { return t.front(); }
-  operator T &() { return t.front(); }
-  // store the value
-  std::vector<T> t;
+  recursive_wrapper(T t_) : t(new T(std::move(t_))) {}
+  operator const T &() const { return *t; }
+  operator T&() { return *t; }
+  unique_ptr<T> t;
 };
 
 class Scheduler {
  public:
   using Body = function<void(void)>;
-
+  struct LeafTask {
+    string name;
+    Body body;
+  };
   struct CompositeTask;
   using CompositeTaskWrapper = recursive_wrapper<CompositeTask>;
+  using Task = variant<LeafTask, CompositeTaskWrapper>;
 
-  using Task = variant<Body, CompositeTaskWrapper>;
+  static string getName(const Task& t) {
+    return visit(overloaded{[](const CompositeTask& c) { return c.getName(); },
+                            [](const LeafTask& l) { return l.name; }},
+                 t);
+  }
 
-  struct CompositeTask {
-    struct TaskData {
-      string name;
-      Task task;
-    };
+  class CompositeTask {
+   public:
+    string getName() const { return m_name; }
 
-    vector<TaskData> tasks;
-    unordered_map<string, size_t> registry;
-
-    void pushBack(string name, Task task) {
-      assert(registry.find(name) == registry.end());
-      tasks.push_back({name, task});
-      registry[move(name)] = tasks.size() - 1;
+    void pushBack(Task task) {
+      auto name = Scheduler::getName(task);
+      assert(m_registry.find(name) == m_registry.end());
+      m_tasks.push_back(move(task));
+      m_registry[move(name)] = m_tasks.size() - 1;
     }
 
-    void insertBefore(string name, Task task, string otherTask) {
+    void insertBefore(Task task, string_view otherTask) {
+      auto name = Scheduler::getName(task);
       auto otherIndex = findTaskIndex(otherTask);
       assert(otherIndex);
-      tasks.insert(tasks.begin() + *otherIndex, {move(name), task});
+      m_tasks.insert(m_tasks.begin() + *otherIndex, move(task));
       updateIndicesAfter(*otherIndex);
     }
 
-    void insertAfter(string name, Task task, string otherTask) {
+    void insertAfter(Task task, string_view otherTask) {
+      auto name = Scheduler::getName(task);
       auto otherIndex = findTaskIndex(otherTask);
       assert(otherIndex);
-      tasks.insert(tasks.begin() + (*otherIndex + 1), {move(name), task});
+      m_tasks.insert(m_tasks.begin() + (*otherIndex + 1), move(task));
       updateIndicesAfter(*otherIndex + 1);
-    }
-
-    void updateIndicesAfter(size_t index) {
-      for (; index != tasks.size(); ++index) {
-        auto& t = tasks[index];
-        registry[t.name] = index;
-      }
-    }
-
-    optional<size_t> findTaskIndex(string_view name) {
-      auto it = registry.find(string(name));
-      if (it != registry.end()) {
-        return it->second;
-      } else {
-        return {};
-      }
     }
 
     Task* findTask(string_view name) {
       auto index = findTaskIndex(name);
       if (index) {
-        return &(tasks[*index].task);
+        return &(m_tasks[*index]);
       } else {
         return nullptr;
       }
@@ -101,94 +97,138 @@ class Scheduler {
       }
     }
 
-    struct TaskExecutor {
-      void operator()(Body t) { t(); }
-      void operator()(CompositeTask t) { t.executeAll(); }
-    };
-
-    void executeAll() {
-      for (auto& t : tasks) {
-        visit(TaskExecutor{}, t.task);
+    template <typename E>
+    void execute(E&& executor = DefaultExecutor{}) {
+      for (auto& t : m_tasks) {
+        visit(forward<E>(executor), t);
       }
     }
 
-    struct TaskDryExecutor {
-      string indent;
-      void operator()(Body t) {}
-      void operator()(CompositeTask t) { t.dryExecuteAll(indent); }
-    };
+    CompositeTask(string name) : m_name(name) {}
+    ~CompositeTask() = default;
+    CompositeTask(const CompositeTask&) = delete;
+    CompositeTask& operator=(const CompositeTask&) = delete;
+    CompositeTask(CompositeTask&&) = default;
+    CompositeTask& operator=(CompositeTask&&) = default;
 
-    void dryExecuteAll(string indent) {
-      for (auto& t : tasks) {
-        cout << indent << t.name << "\n";
-        visit(TaskDryExecutor{indent + indent}, t.task);
+   private:
+    void updateIndicesAfter(size_t index) {
+      for (; index != m_tasks.size(); ++index) {
+        auto& t = m_tasks[index];
+        m_registry[Scheduler::getName(t)] = index;
       }
     }
+
+    optional<size_t> findTaskIndex(string_view name) {
+      auto it = m_registry.find(string(name));
+      if (it != m_registry.end()) {
+        return it->second;
+      } else {
+        return {};
+      }
+    }
+
+    string m_name;
+    vector<Task> m_tasks;
+    unordered_map<string, size_t> m_registry;
   };
 
-  void pushBack(string name, Task task) { mainTask.pushBack(name, task); }
+  void pushBack(Task task) { m_mainTask.pushBack(move(task)); }
 
-  void insertBefore(string name, Task task, string otherTask) {
-    mainTask.insertBefore(name, task, otherTask);
+  void insertBefore(Task task, string_view otherTask) {
+    m_mainTask.insertBefore(move(task), otherTask);
   }
 
-  void insertAfter(string name, Task task, string otherTask) {
-    mainTask.insertAfter(name, task, otherTask);
+  void insertAfter(Task task, string_view otherTask) {
+    m_mainTask.insertAfter(move(task), otherTask);
   }
 
-  Task* findTask(string_view name) { return mainTask.findTask(name); }
+  Task* findTask(string_view name) { return m_mainTask.findTask(name); }
 
   CompositeTask* findCompositeTask(string_view name) {
-    return mainTask.findCompositeTask(name);
+    return m_mainTask.findCompositeTask(name);
   }
 
-  void executeAll() { mainTask.executeAll(); }
+  struct DefaultExecutor {
+    void operator()(LeafTask& l) { l.body(); }
+    void operator()(CompositeTask& c) { c.execute(*this); }
+  };
 
-  void dryExecuteAll(string indent) { mainTask.dryExecuteAll(indent); }
+  template <typename E = DefaultExecutor>
+  void execute(E&& executor = DefaultExecutor{}) {
+    m_mainTask.execute(forward<E>(executor));
+  }
+
+  Scheduler() = default;
+  ~Scheduler() = default;
+  Scheduler(const Scheduler&) = delete;
+  Scheduler& operator=(const Scheduler&) = delete;
+  Scheduler(Scheduler&&) = default;
+  Scheduler& operator=(Scheduler&&) = default;
 
  private:
-  CompositeTask mainTask;
+  CompositeTask m_mainTask{"main"};
 };
 
+// ------------------------------------------------------------------------------
+
+using Composite = Scheduler::CompositeTask;
+using Leaf = Scheduler::LeafTask;
+
 struct Main {
-  void update() {}
-  void render1() {}
-  void render2() {}
+  void update() { PRINT_FUNCTION; }
+  void render1() { PRINT_FUNCTION; }
+  void render2() { PRINT_FUNCTION; }
 };
 
 struct MainExtension {
-  void preUpdate() {}
-  void postUpdate() {}
-  void preRender2() {}
-  void postRender2() {}
+  void preUpdate() { PRINT_FUNCTION; }
+  void postUpdate() { PRINT_FUNCTION; }
+  void preRender2() { PRINT_FUNCTION; }
+  void postRender2() { PRINT_FUNCTION; }
 };
+
+struct CallOrderPrinter {
+  string indent;
+  void operator()(Leaf& l) { cout << indent << l.name << "\n"; }
+  void operator()(Composite& c) {
+    cout << indent << c.getName() << "\n";
+    c.execute(CallOrderPrinter{indent + indent});
+  }
+};
+
+// ------------------------------------------------------------------------------
 
 int main() {
   Scheduler s;
+
+  Main m;
+
+  s.pushBack(Leaf{"update", [&m] { m.update(); }});
+
   {
-    Main m;
-
-    s.pushBack("update", [&m] { m.update(); });
-
-    Scheduler::CompositeTask render;
-    render.pushBack("render1", [&m] { m.render1(); });
-    render.pushBack("render2", [&m] { m.render2(); });
-    s.pushBack("render", move(render));
+    Composite render{"render"};
+    render.pushBack(Leaf{"render1", [&m] { m.render1(); }});
+    render.pushBack(Leaf{"render2", [&m] { m.render2(); }});
+    s.pushBack(move(render));
   }
+
+  MainExtension me;
+
+  s.insertBefore(Leaf{"preUpdate", [&me] { me.preUpdate(); }}, "update");
+  s.insertAfter(Leaf{"postUpdate", [&me] { me.postUpdate(); }}, "update");
+
   {
-    MainExtension me;
-
-    s.insertBefore(
-        "preUpdate", [&me] { me.preUpdate(); }, "update");
-    s.insertAfter(
-        "postUpdate", [&me] { me.postUpdate(); }, "update");
-
     auto render = s.findCompositeTask("render");
-    render->insertBefore(
-        "preRender2", [&me] { me.preRender2(); }, "render2");
-    render->insertAfter(
-        "postRender2", [&me] { me.postRender2(); }, "render2");
-
-    s.dryExecuteAll("  ");
+    render->insertBefore(Leaf{"preRender2", [&me] { me.preRender2(); }},
+                         "render2");
+    render->insertAfter(Leaf{"postRender2", [&me] { me.postRender2(); }},
+                        "render2");
   }
+
+  cout << "Execution:\n";
+  s.execute();
+
+  cout << "Call Order:\n";
+  s.execute(CallOrderPrinter{"  "});
 }
