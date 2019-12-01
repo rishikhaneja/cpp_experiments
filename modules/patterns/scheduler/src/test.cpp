@@ -7,71 +7,50 @@
 using namespace std;
 using namespace testing;
 
+using Priority = Scheduler::Priority;
+
+namespace {
+Priority update;
+Priority layout;
+Priority render;
+
 struct Main {
     MOCK_METHOD0(update, void(void));
-    MOCK_METHOD0(render1, void(void));
-    MOCK_METHOD0(render2, void(void));
+    MOCK_METHOD0(layout, void(void));
+    MOCK_METHOD0(render, void(void));
 };
 
 struct MainExtension {
     MOCK_METHOD0(preUpdate, void(void));
     MOCK_METHOD0(postUpdate, void(void));
-    MOCK_METHOD0(preRender2, void(void));
-    MOCK_METHOD0(postRender2, void(void));
+    MOCK_METHOD0(final, void(void));
 };
 
-using Composite = Scheduler::CompositeTask;
-using Leaf = Scheduler::LeafTask;
-
-struct CallOrderPrinter {
-    string indent;
-    void operator()(Leaf& l) { cout << indent << l.name << "\n"; }
-    void operator()(Composite& c) {
-        cout << indent << c.getName() << "\n";
-        c.execute(CallOrderPrinter{indent + indent});
-    }
-};
+}  // namespace
 
 TEST(scheduler, basic) {
     Main m;
-    Scheduler s;
-
-    s.pushBack(Leaf{"update", [&m] { m.update(); }});
-
-    {
-        Composite render{"render"};
-        render.pushBack(Leaf{"render1", [&m] { m.render1(); }});
-        render.pushBack(Leaf{"render2", [&m] { m.render2(); }});
-        s.pushBack(move(render));
-    }
+    update.at = {{"update", [&m]() { m.update(); }}};
+    layout.at = {{"layout", [&m]() { m.layout(); }}};
+    render.at = {{"render", [&m]() { m.render(); }}};
 
     MainExtension me;
 
-    s.insertBefore(Leaf{"preUpdate", [&me] { me.preUpdate(); }}, "update");
-    s.insertAfter(Leaf{"postUpdate", [&me] { me.postUpdate(); }}, "update");
+    Priority final(render);
 
-    {
-        auto render = s.findCompositeTask("render");
-        render->insertBefore(Leaf{"preRender2", [&me] { me.preRender2(); }},
-                             "render2");
-        render->insertAfter(Leaf{"postRender2", [&me] { me.postRender2(); }},
-                            "render2");
-    }
+    update.before.push_back({"preUpdate", [&me]() { me.preUpdate(); }});
+    update.after.push_back({"postUpdate", [&me]() { me.postUpdate(); }});
+    final.at = {{"final", [&me]() { me.final(); }}};
 
     {
         InSequence seq;
-
-        EXPECT_CALL(me, preUpdate()).Times(1);
-        EXPECT_CALL(m, update()).Times(1);
-        EXPECT_CALL(me, postUpdate()).Times(1);
-        EXPECT_CALL(m, render1()).Times(1);
-        EXPECT_CALL(me, preRender2()).Times(1);
-        EXPECT_CALL(m, render2()).Times(1);
-        EXPECT_CALL(me, postRender2()).Times(1);
+        EXPECT_CALL(me, preUpdate());
+        EXPECT_CALL(m, update());
+        EXPECT_CALL(me, postUpdate());
+        EXPECT_CALL(m, layout());
+        EXPECT_CALL(m, render());
+        EXPECT_CALL(me, final());
     }
 
-    s.execute();
-
-    cout << "Call Order:\n";
-    s.execute(CallOrderPrinter{"  "});
+    Scheduler::execute();
 }
