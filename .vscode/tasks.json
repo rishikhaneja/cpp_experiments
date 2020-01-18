@@ -16,6 +16,12 @@
             "problemMatcher": []
         },
         {
+            "label": "sol",
+            "type": "shell",
+            "command": "cd ${workspaceFolder}/build/modules/sol && ./sol",
+            "problemMatcher": []
+        },
+        {
             "label": "patterns/pimpl",
             "type": "shell",
             "command": "cd ${workspaceFolder}/build/modules/patterns/pimpl && ./pimpl",

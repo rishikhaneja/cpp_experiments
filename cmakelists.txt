@@ -3,12 +3,13 @@ cmake_minimum_required(VERSION 3.12)
 project(cpp_experiments)
 
 set(SOLUTION_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(DEPENDENCIES_DIR ${SOLUTION_DIR}/dependencies)
 set(MODULES_DIR ${SOLUTION_DIR}/modules)
 set(PATTERNS_DIR ${MODULES_DIR}/patterns)
 
 # ---------------------------------------------------------------------
 # Download and unpack googletest
-configure_file(dependencies/gtest googletest-download/CMakeLists.txt)
+configure_file(${DEPENDENCIES_DIR}/cmake/gtest googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
   RESULT_VARIABLE result
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
@@ -32,5 +33,6 @@ add_subdirectory(modules/patterns/range)
 add_subdirectory(modules/patterns/tree)
 add_subdirectory(modules/patterns/scheduler)
 add_subdirectory(modules/boost/spirit)
+add_subdirectory(modules/sol)
 add_subdirectory(modules/practice/per_day)
 add_subdirectory(modules/playground)
