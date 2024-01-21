@@ -6,8 +6,6 @@ project(${EXECUTABLE_NAME})
 
 include_directories(inc)
 
-include_directories(${gtest_SOURCE_DIR}/include)
-
 include_directories(${PATTERNS_DIR}/range/inc)
 
 file(GLOB SOURCES "src/*.cpp")
@@ -18,4 +16,6 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES
     CXX_STANDARD 17
 )
 
-target_link_libraries(${EXECUTABLE_NAME} gmock_main)
+target_link_libraries(${EXECUTABLE_NAME} GTest::gtest_main GTest::gmock_main)
+
+gtest_discover_tests(${EXECUTABLE_NAME})
