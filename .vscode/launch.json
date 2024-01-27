@@ -3,54 +3,5 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "(lldb) Launch _template_",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/modules/_template_/_template_",
-            "args": [],
-            "stopAtEntry": true,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "lldb"
-        },
-        {
-            "name": "(lldb) Launch patterns/pimpl",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/modules/patterns/pimpl/pimpl",
-            "args": [],
-            "stopAtEntry": true,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "lldb"
-        },
-        {
-            "name": "(lldb) Launch patterns/tree",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/modules/patterns/tree/tree",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": true,
-            "MIMode": "lldb"
-        },
-        {
-            "name": "(lldb) Launch boost/sprit",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/modules/boost/spirit/spirit",
-            "args": [],
-            "stopAtEntry": true,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": true,
-            "MIMode": "lldb"
-        },
-    ]
+    "configurations": []
 }
