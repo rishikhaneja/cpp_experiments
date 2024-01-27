@@ -15,10 +15,9 @@
 #include <type_traits>
 #include <vector>
 
-#include "range.h"
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "range.h"
 
 using namespace std;
 using namespace testing;
@@ -153,10 +152,11 @@ struct node {
     node_ptr left;
     node_ptr right;
 };
-auto serialize = [](const auto& n) -> std::string {
+template <typename T>
+std::string serialize(const node<T>& n) {
     return std::to_string(n.value) + "(" + (n.left ? serialize(*n.left) : "") +
            "," + (n.right ? serialize(*n.right) : "") + ")";
-};
+}
 
 // Given the root to a binary tree, implement serialize(root), which serializes
 // the tree into a string, and deserialize(s), which deserializes the string

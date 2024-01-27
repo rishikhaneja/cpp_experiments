@@ -36,7 +36,7 @@ struct Node {
             return nextsibling;
         } else {
             Node* current = this;
-            while (current = current->parent()) {
+            while ((current = current->parent())) {
                 if (Node* nextsibling = current->next_sibling()) {
                     return nextsibling;
                 }
