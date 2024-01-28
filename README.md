@@ -13,4 +13,4 @@
 
 * latest cmake
 * latest gcc
-* internet connection for google test download
+* internet connection for dependencies download
